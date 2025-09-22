@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Worm Game</title>
+  <style>
+    body {
+      background-color: #f0fff0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Comic Sans MS', cursive;
+      padding-top: 40px;
+    }
+
+    canvas {
+      background-color: #d0ffd0;
+      border: 3px solid #4caf50;
+      margin-top: 20px;
+    }
+
+    .score {
+      font-size: 20px;
+      margin-top: 20px;
+      color: #4caf50;
+    }
+
+    #play-worm {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #a3c957;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #play-worm:hover {
+      background-color: #8bbf45;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐛 Worm Game</h1>
+  <div class="score">Score: <span id="score">0</span></div>
+  <button id="play-worm">Start Game</button>
+  <canvas id="game" width="400" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const box = 20;
+    let score = 0;
+    let game;
+
+    const wormImg = new Image();
+    wormImg.src = "worm.jfif";
+
+    const foodImg = new Image();
+    foodImg.src = "food.jfif";
+
+    let worm = [{ x: 9 * box, y: 10 * box }];
+    let direction = "RIGHT";
+
+    let food = {
+      x: Math.floor(Math.random() * 19) * box,
+      y: Math.floor(Math.random() * 19) * box
+    };
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+      if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+      if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+      if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+    });
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw worm
+      for (let i = 0; i < worm.length; i++) {
+        if (wormImg.complete && wormImg.naturalWidth !== 0) {
+          ctx.drawImage(wormImg, worm[i].x, worm[i].y, box, box);
+        } else {
+          ctx.fillStyle = i === 0 ? "#a3c957" : "#8bbf45";
+          ctx.fillRect(worm[i].x, worm[i].y, box, box);
+        }
+      }
+
+      // Draw food
+      if (foodImg.complete && foodImg.naturalWidth !== 0) {
+        ctx.drawImage(foodImg, food.x, food.y, box, box);
+      } else {
+        ctx.fillStyle = "#ff4081";
+        ctx.fillRect(food.x, food.y, box, box);
+      }
+
+      // Move worm
+      let headX = worm[0].x;
+      let headY = worm[0].y;
+
+      if (direction === "LEFT") headX -= box;
+      if (direction === "UP") headY -= box;
+      if (direction === "RIGHT") headX += box;
+      if (direction === "DOWN") headY += box;
+
+      // Check collision with food
+      if (headX === food.x && headY === food.y) {
+        score++;
+        document.getElementById("score").textContent = score;
+        food = {
+          x: Math.floor(Math.random() * 19) * box,
+          y: Math.floor(Math.random() * 19) * box
+        };
+      } else {
+        worm.pop();
+      }
+
+      // Game over conditions
+      if (
+        headX < 0 || headX >= canvas.width ||
+        headY < 0 || headY >= canvas.height ||
+        worm.some(segment => segment.x === headX && segment.y === headY)
+      ) {
+        clearInterval(game);
+        alert("Game Over! Final Score: " + score);
+      }
+
+      worm.unshift({ x: headX, y: headY });
+    }
+
+    document.getElementById("play-worm").addEventListener("click", () => {
+      // Reset game state
+      worm = [{ x: 9 * box, y: 10 * box }];
+      direction = "RIGHT";
+      score = 0;
+      document.getElementById("score").textContent = score;
+      food = {
+        x: Math.floor(Math.random() * 19) * box,
+        y: Math.floor(Math.random() * 19) * box
+      };
+      clearInterval(game);
+      game = setInterval(draw, 100);
+    });
+  </script>
+</body>
+</html>

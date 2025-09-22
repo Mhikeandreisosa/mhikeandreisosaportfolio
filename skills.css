@@ -1,0 +1,7 @@
+/* Skill Bar Animation */
+.progress {
+  height: 100%;
+  background-color: #4caf50;
+  width: 0; /* Start at 0 for animation */
+  transition: width 1.5s ease;
+}
